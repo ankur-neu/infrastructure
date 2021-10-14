@@ -3,22 +3,24 @@
 &nbsp;
 
 #### Pre requisites
-##### 1. NodeJS is installed in your system
-> https://nodejs.org/en/download/
+##### 1. Install terraform in your system
+> https://www.terraform.io/downloads.html
 
-    Type node -v in your terminal to check nodejs version
-##### 2. Npm is installed in your system
-    Type npm -v in your terminal to check npm version
-##### 3. PostgreSQl is installed in your system
-> https://www.postgresql.org/download/
+    Type terraform -v in your terminal to check terraform version
+##### 2. Install Aws cli in your system
+> https://aws.amazon.com/cli/
+
+    Type aws --version in your terminal to check aws cli version
+
 
 &nbsp;
-#### Steps to run web app
-##### 1. Clone git repository to your local system and navigate to the project in Terminal using cd webapp
-##### 2. Type "npm install"
-##### 3. Type "npm run dev"
+#### Steps to run app using terraform infrastructure as code
+##### 1. Clone git repository to your local system and navigate to the project in Terminal using cd infrastructure
+##### 2. Type "terraform init"
+##### 3. Type "terraform plan to check the deployment plan"
+
+##### 4. Type "terraform apply to apply the changes to the cloud infrastructure"
 &nbsp;
-> .env file is required to run project
 
 
 
