@@ -7,5 +7,5 @@ output "vpc_gw_id" {
 }
 
 output "vpc_subnet_id" {
-  value = [for sub in aws_subnet.subnet_infra : sub.cidr_block]
+  value = [for sub in aws_subnet.subnet_infra : sub.id]
 }

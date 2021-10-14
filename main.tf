@@ -1,19 +1,10 @@
-locals {
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-  // subnet_az_cidr = {
-  //   "us-east-1a" = "10.0.2.0/24",
-  //   "us-east-1b" = "10.0.3.0/24",
-  //   "us-east-1c" = "10.0.4.0/24",
-  // }
-}
 
 resource "aws_vpc" "vpc_infra" {
   cidr_block                       = var.vpc_cidr_block
-  enable_dns_hostnames             = local.enable_dns_hostnames
-  enable_dns_support               = true
-  enable_classiclink_dns_support   = true
-  assign_generated_ipv6_cidr_block = false
+  enable_dns_hostnames             = var.vpc_enable_dns_hostnames
+  enable_dns_support               = var.vpc_enable_dns_support
+  enable_classiclink_dns_support   = var.vpc_enable_classiclink_dns_support
+  assign_generated_ipv6_cidr_block = var.vpc_assign_generated_ipv6_cidr_block
 
   tags = {
     Name        = "vpc_infra"
@@ -26,12 +17,10 @@ resource "aws_subnet" "subnet_infra" {
 
   for_each = var.subnets
 
-  // for_each = {for sub in var.subnets}
-
   cidr_block              = each.value.cidr
   vpc_id                  = aws_vpc.vpc_infra.id
   availability_zone       = each.value.az
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = var.aws_subnet_map_public_ip_on_launch
   tags = {
     Name        = "subnet_infra_${each.value.count}"
     description = "subnet for infrastructue"
@@ -54,7 +43,7 @@ resource "aws_route_table" "infra_route" {
   vpc_id     = aws_vpc.vpc_infra.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.route_table_cidr
     gateway_id = aws_internet_gateway.infra_gw.id
   }
 
@@ -62,4 +51,11 @@ resource "aws_route_table" "infra_route" {
     Name        = "infra_route_table"
     description = "route table for infrastructue"
   }
+}
+
+resource "aws_route_table_association" "anan" {
+  depends_on     = [aws_route_table.infra_route, aws_subnet.subnet_infra]
+  for_each       = aws_subnet.subnet_infra
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.infra_route.id
 }
