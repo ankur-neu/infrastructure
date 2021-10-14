@@ -52,7 +52,6 @@ variable "aws_subnet_map_public_ip_on_launch" {
   type        = bool
 }
 
-
 // cidr details of route table
 variable "route_table_cidr" {
   description = "CIDR for vpc route table"

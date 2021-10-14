@@ -12,6 +12,7 @@ resource "aws_vpc" "vpc_infra" {
   }
 }
 
+
 resource "aws_subnet" "subnet_infra" {
   depends_on = [aws_vpc.vpc_infra]
 
@@ -33,7 +34,7 @@ resource "aws_internet_gateway" "infra_gw" {
   vpc_id     = aws_vpc.vpc_infra.id
 
   tags = {
-    Name        = "vpc_infra_gw"
+    Name        = "vpc_gw_infra"
     description = "gateway for infrastructue"
   }
 }
@@ -48,12 +49,12 @@ resource "aws_route_table" "infra_route" {
   }
 
   tags = {
-    Name        = "infra_route_table"
+    Name        = "route_table_infra"
     description = "route table for infrastructue"
   }
 }
 
-resource "aws_route_table_association" "anan" {
+resource "aws_route_table_association" "route_table_asso" {
   depends_on     = [aws_route_table.infra_route, aws_subnet.subnet_infra]
   for_each       = aws_subnet.subnet_infra
   subnet_id      = each.value.id
