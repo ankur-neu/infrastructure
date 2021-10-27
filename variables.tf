@@ -58,6 +58,117 @@ variable "route_table_cidr" {
   type        = string
 }
 
+variable "sg_app_ingress_p1" {
+  description = "Ingress port for application"
+  type        = number
+}
+
+variable "sg_app_ingress_p2" {
+  description = "Ingress port for application"
+  type        = number
+}
+
+variable "sg_app_ingress_p3" {
+  description = "Ingress port for application"
+  type        = number
+}
+
+variable "sg_app_ingress_p4" {
+  description = "Ingress port for application"
+  type        = number
+}
+
+
+variable "sg_db_ingress_p1" {
+  description = "Ingress port for application"
+  type        = number
+}
+
+
+variable "protocol" {
+  description = "Ingress port for application"
+  type        = string
+}
+
+variable "db_param_family" {
+  description = "Ingress port for application"
+  type        = string
+}
+
+
+variable "db_engine" {
+  description = "Ingress port for application"
+  type        = string
+}
+
+variable "db_engine_version" {
+  description = "Ingress port for application"
+  type        = string
+}
+
+variable "db_instance_class" {
+  description = "Ingress port for application"
+  type        = string
+}
+
+variable "db_multi_az" {
+  description = "Ingress port for application"
+  type        = bool
+}
+
+variable "db_identifier" {
+  description = "Ingress port for application"
+  type        = string
+}
+
+variable "db_pass" {
+  description = "Ingress port for application"
+  type        = string
+}
+
+variable "db_public_access" {
+  description = "Ingress port for application"
+  type        = bool
+}
+
+variable "db_snapshot" {
+  description = "Ingress port for application"
+  type        = bool
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+variable "domain_name" {
+  description = "Name of domain"
+  type        = string
+}
+
+variable "region" {
+  description = "Current AWS Region"
+  type        = string
+}
+
+variable "AmiLinux" {
+  description = "AMI Used"
+  type        = string
+}
+
 
 
 
