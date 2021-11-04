@@ -251,5 +251,3 @@ variable "secret_key" {
 
 
 
-
-
