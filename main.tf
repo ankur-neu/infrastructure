@@ -290,9 +290,10 @@ resource "aws_iam_role" "EC2-CSYE6225" {
 
 
 resource "aws_iam_instance_profile" "iam_profile" {
-  name = "iam-profile"
-  role = aws_iam_role.EC2-CSYE6225.name
+  name = "iam-prof"
+  role = "CodeDeployEC2ServiceRole"
 }
+
 
 resource "aws_key_pair" "ubuntu" {
   key_name   = var.ec2_key_name
@@ -340,4 +341,30 @@ resource "aws_instance" "csye_instance" {
   key_name             = aws_key_pair.ubuntu.key_name
   iam_instance_profile = aws_iam_instance_profile.iam_profile.name
 
+  tags = {
+    Name = "csye6225_ec2"
+  }
+
 }
+
+
+
+
+
+
+
+// data "aws_route53_zone" "selected" {
+//   name         = "${var.domain_name}"
+//   private_zone = false
+// }
+
+// resource "aws_route53_record" "www" {
+//   zone_id = "${data.aws_route53_zone.selected.zone_id}"
+//   name    = "${var.domain_name}"
+//   type    = "A"
+//   alias {
+//     name                   = "${aws_lb.csye6225-lb.dns_name}"
+//     zone_id                = "${aws_lb.csye6225-lb.zone_id}"
+//     evaluate_target_health = false
+//   }
+// }
