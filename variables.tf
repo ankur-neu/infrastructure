@@ -247,6 +247,17 @@ variable "secret_key" {
   type        = string
 }
 
+variable "ami_owners" {
+  description = "Ami owner Id"
+  type        = string
+}
+
+
+variable "ec2_deploy_role_name" {
+  description = "EC2 service code deploy role name"
+  type        = string
+}
+
 
 
 
