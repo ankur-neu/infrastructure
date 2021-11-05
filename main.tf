@@ -288,10 +288,15 @@ resource "aws_iam_role" "EC2-CSYE6225" {
 
 // EC2 *******************************************************************
 
+data "aws_ami" "ami" {
+  most_recent = true
+  owners      = [var.ami_owners]
+}
+
 
 resource "aws_iam_instance_profile" "iam_profile" {
   name = "iam-prof"
-  role = "CodeDeployEC2ServiceRole"
+  role = var.ec2_deploy_role_name
 }
 
 
@@ -303,7 +308,7 @@ resource "aws_key_pair" "ubuntu" {
 
 resource "aws_instance" "csye_instance" {
   depends_on             = [aws_db_instance.rds]
-  ami                    = var.ami
+  ami                    = data.aws_ami.ami.id
   instance_type          = var.ec2_instance_type
   subnet_id              = values(aws_subnet.subnet_infra)[0].id
   vpc_security_group_ids = [aws_security_group.application.id]
@@ -347,24 +352,16 @@ resource "aws_instance" "csye_instance" {
 
 }
 
+data "aws_route53_zone" "zone" {
+  name         = var.domain_name
+  private_zone = false
+}
 
-
-
-
-
-
-// data "aws_route53_zone" "selected" {
-//   name         = "${var.domain_name}"
-//   private_zone = false
-// }
-
-// resource "aws_route53_record" "www" {
-//   zone_id = "${data.aws_route53_zone.selected.zone_id}"
-//   name    = "${var.domain_name}"
-//   type    = "A"
-//   alias {
-//     name                   = "${aws_lb.csye6225-lb.dns_name}"
-//     zone_id                = "${aws_lb.csye6225-lb.zone_id}"
-//     evaluate_target_health = false
-//   }
-// }
+resource "aws_route53_record" "www" {
+  depends_on = [aws_instance.csye_instance]
+  zone_id    = data.aws_route53_zone.zone.zone_id
+  name       = data.aws_route53_zone.zone.name
+  type       = "A"
+  ttl        = "300"
+  records    = [aws_instance.csye_instance.public_ip]
+}
