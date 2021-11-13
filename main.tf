@@ -80,10 +80,10 @@ resource "aws_security_group" "application" {
   vpc_id      = aws_vpc.vpc_infra.id
 
   ingress {
-    description      = var.sg_app_ingress_desc
-    from_port        = var.sg_app_ingress_p1
-    to_port          = var.sg_app_ingress_p1
-    protocol         = var.protocol
+    description = var.sg_app_ingress_desc
+    from_port   = var.sg_app_ingress_p1
+    to_port     = var.sg_app_ingress_p1
+    protocol    = var.protocol
     cidr_blocks      = [var.sg_app_cidr]
     ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
   }
@@ -110,8 +110,9 @@ resource "aws_security_group" "application" {
     from_port        = var.sg_app_ingress_p4
     to_port          = var.sg_app_ingress_p4
     protocol         = var.protocol
-    cidr_blocks      = [var.sg_app_cidr]
-    ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
+    // cidr_blocks      = [var.sg_app_cidr]
+    // ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
+    security_groups = ["${aws_security_group.lb_sg.id}"]
   }
 
   egress {
@@ -306,51 +307,51 @@ resource "aws_key_pair" "ubuntu" {
 }
 
 
-resource "aws_instance" "csye_instance" {
-  depends_on             = [aws_db_instance.rds]
-  ami                    = data.aws_ami.ami.id
-  instance_type          = var.ec2_instance_type
-  subnet_id              = values(aws_subnet.subnet_infra)[0].id
-  vpc_security_group_ids = [aws_security_group.application.id]
-  user_data              = <<-EOF
-    #!/bin/bash
-    sudo apt-get update
-    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-    sudo apt install npm
+// resource "aws_instance" "csye_instance" {
+//   depends_on             = [aws_db_instance.rds]
+//   ami                    = data.aws_ami.ami.id
+//   instance_type          = var.ec2_instance_type
+//   subnet_id              = values(aws_subnet.subnet_infra)[0].id
+//   vpc_security_group_ids = [aws_security_group.application.id]
+//   user_data              = <<-EOF
+//     #!/bin/bash
+//     sudo apt-get update
+//     curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+//     sudo apt-get install -y nodejs
+//     sudo apt install npm
 
-    echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
-    echo export PORT=${var.app_port} >> /etc/profile
-    echo export DB_NAME=${var.db_name} >> /etc/profile
-    echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
-    echo export DB_USER=${var.db_user} >> /etc/profile
-    echo export DB_PASS=${var.db_pass} >> /etc/profile
-    echo export DB_PORT=${var.sg_db_ingress_p1} >> /etc/profile
-    echo export BUCKET_NAME=${aws_s3_bucket.bucket.id} >> /etc/profile
-    echo export ACCESS_KEY=${var.access_key} >> /etc/profile
-    echo export SECRET_KEY=${var.secret_key} >> /etc/profile
-  EOF
+//     echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
+//     echo export PORT=${var.app_port} >> /etc/profile
+//     echo export DB_NAME=${var.db_name} >> /etc/profile
+//     echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
+//     echo export DB_USER=${var.db_user} >> /etc/profile
+//     echo export DB_PASS=${var.db_pass} >> /etc/profile
+//     echo export DB_PORT=${var.sg_db_ingress_p1} >> /etc/profile
+//     echo export BUCKET_NAME=${aws_s3_bucket.bucket.id} >> /etc/profile
+//     // echo export ACCESS_KEY=${var.access_key} >> /etc/profile
+//     // echo export SECRET_KEY=${var.secret_key} >> /etc/profile
+//   EOF
 
-  disable_api_termination = false
-  root_block_device {
-    delete_on_termination = true
-    volume_size           = 20
-    volume_type           = "gp2"
-  }
-  connection {
-    type        = "ssh"
-    user        = var.ec2_conn_user
-    private_key = file("key")
-    host        = self.public_ip
-  }
-  key_name             = aws_key_pair.ubuntu.key_name
-  iam_instance_profile = aws_iam_instance_profile.iam_profile.name
+//   disable_api_termination = false
+//   root_block_device {
+//     delete_on_termination = true
+//     volume_size           = 20
+//     volume_type           = "gp2"
+//   }
+//   connection {
+//     type        = "ssh"
+//     user        = var.ec2_conn_user
+//     private_key = file("key")
+//     host        = self.public_ip
+//   }
+//   key_name             = aws_key_pair.ubuntu.key_name
+//   iam_instance_profile = aws_iam_instance_profile.iam_profile.name
 
-  tags = {
-    Name = "csye6225_ec2"
-  }
+//   tags = {
+//     Name = "csye6225_ec2"
+//   }
 
-}
+// }
 
 data "aws_route53_zone" "zone" {
   name         = var.domain_name
@@ -358,10 +359,14 @@ data "aws_route53_zone" "zone" {
 }
 
 resource "aws_route53_record" "www" {
-  depends_on = [aws_instance.csye_instance]
-  zone_id    = data.aws_route53_zone.zone.zone_id
-  name       = data.aws_route53_zone.zone.name
-  type       = "A"
-  ttl        = "300"
-  records    = [aws_instance.csye_instance.public_ip]
+  // depends_on = [aws_instance.csye_instance]
+  zone_id = data.aws_route53_zone.zone.zone_id
+  name    = data.aws_route53_zone.zone.name
+  type    = "A"
+  // ttl        = "300"
+  alias {
+    name                   = aws_lb.aws_lb_app.dns_name
+    zone_id                = aws_lb.aws_lb_app.zone_id
+    evaluate_target_health = false
+  }
 }

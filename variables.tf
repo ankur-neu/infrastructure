@@ -169,6 +169,11 @@ variable "sg_app_ingress_desc" {
   type        = string
 }
 
+variable "sg_lb_ingress_desc" {
+  description = "Ingress description for load balancer for web app"
+  type        = string
+}
+
 variable "sg_db_ingress_desc" {
   description = "Ingress description for db security group IPv6"
   type        = string
@@ -232,8 +237,8 @@ variable "region" {
   type        = string
 }
 
-variable "ami" {
-  description = "AMI Used"
+variable "key_name" {
+  description = "Public key name"
   type        = string
 }
 
@@ -258,7 +263,20 @@ variable "ec2_deploy_role_name" {
   type        = string
 }
 
+variable "environment" {
+  description = "Envireonment of web app"
+  type        = string
+}
 
+variable "bucket_name" {
+  description = "Bucket Name"
+  type        = string
+}
+
+variable "app_user_name" {
+  description = "Iam user name"
+  type        = string
+}
 
 
 
