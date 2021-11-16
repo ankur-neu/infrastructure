@@ -79,37 +79,37 @@ resource "aws_security_group" "application" {
   description = "Allow application inbound traffic"
   vpc_id      = aws_vpc.vpc_infra.id
 
+  // ingress {
+  //   description = var.sg_app_ingress_desc
+  //   from_port   = var.sg_app_ingress_p1
+  //   to_port     = var.sg_app_ingress_p1
+  //   protocol    = var.protocol
+  //   cidr_blocks      = [var.sg_app_cidr]
+  //   ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
+  // }
+
+  // ingress {
+  //   description      = var.sg_app_ingress_desc
+  //   from_port        = var.sg_app_ingress_p2
+  //   to_port          = var.sg_app_ingress_p2
+  //   protocol         = var.protocol
+  //   cidr_blocks      = [var.sg_app_cidr]
+  //   ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
+  // }
+
+  // ingress {
+  //   description      = var.sg_app_ingress_desc
+  //   from_port        = var.sg_app_ingress_p3
+  //   to_port          = var.sg_app_ingress_p3
+  //   protocol         = var.protocol
+  //   cidr_blocks      = [var.sg_app_cidr]
+  //   ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
+  // }
   ingress {
     description = var.sg_app_ingress_desc
-    from_port   = var.sg_app_ingress_p1
-    to_port     = var.sg_app_ingress_p1
+    from_port   = var.sg_app_ingress_p4
+    to_port     = var.sg_app_ingress_p4
     protocol    = var.protocol
-    cidr_blocks      = [var.sg_app_cidr]
-    ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
-  }
-
-  ingress {
-    description      = var.sg_app_ingress_desc
-    from_port        = var.sg_app_ingress_p2
-    to_port          = var.sg_app_ingress_p2
-    protocol         = var.protocol
-    cidr_blocks      = [var.sg_app_cidr]
-    ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
-  }
-
-  ingress {
-    description      = var.sg_app_ingress_desc
-    from_port        = var.sg_app_ingress_p3
-    to_port          = var.sg_app_ingress_p3
-    protocol         = var.protocol
-    cidr_blocks      = [var.sg_app_cidr]
-    ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
-  }
-  ingress {
-    description      = var.sg_app_ingress_desc
-    from_port        = var.sg_app_ingress_p4
-    to_port          = var.sg_app_ingress_p4
-    protocol         = var.protocol
     // cidr_blocks      = [var.sg_app_cidr]
     // ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
     security_groups = ["${aws_security_group.lb_sg.id}"]

@@ -23,8 +23,6 @@ resource "aws_launch_configuration" "alc" {
     echo export DB_PASS=${var.db_pass} >> /etc/profile
     echo export DB_PORT=${var.sg_db_ingress_p1} >> /etc/profile
     echo export BUCKET_NAME=${aws_s3_bucket.bucket.id} >> /etc/profile
-    echo export ACCESS_KEY=${var.access_key} >> /etc/profile
-    echo export SECRET_KEY=${var.secret_key} >> /etc/profile
   EOF
 
   key_name                    = aws_key_pair.ubuntu.key_name
@@ -37,16 +35,16 @@ resource "aws_launch_configuration" "alc" {
 }
 
 resource "aws_autoscaling_group" "asg" {
-  depends_on                = [aws_launch_configuration.alc, aws_subnet.subnet_infra]
-  name                      = "autoScalingGroup"
-  max_size                  = 5
-  min_size                  = 3
+  depends_on = [aws_launch_configuration.alc, aws_subnet.subnet_infra]
+  name       = "autoScalingGroup"
+  max_size   = 5
+  min_size   = 3
   // health_check_grace_period = 60
-  desired_capacity          = 3
-  launch_configuration      = "${aws_launch_configuration.alc.name}"
-  vpc_zone_identifier       = values(aws_subnet.subnet_infra)[*].id
-  target_group_arns         = ["${aws_lb_target_group.lb_targetgroup.arn}"]
-  default_cooldown          = "60"
+  desired_capacity     = 3
+  launch_configuration = aws_launch_configuration.alc.name
+  vpc_zone_identifier  = values(aws_subnet.subnet_infra)[*].id
+  target_group_arns    = ["${aws_lb_target_group.lb_targetgroup.arn}"]
+  default_cooldown     = "60"
   tag {
     key                 = "Name"
     value               = "csye6225_ec2"
@@ -54,22 +52,15 @@ resource "aws_autoscaling_group" "asg" {
   }
 }
 
-resource "aws_autoscaling_policy" "asg_policy" {
-  depends_on             = [aws_autoscaling_group.asg]
-  name                   = "asg-policy"
-  scaling_adjustment     = 1
-  adjustment_type        = "ChangeInCapacity"
-  cooldown               = 60
-  autoscaling_group_name = aws_autoscaling_group.asg.name
-}
+
 
 resource "aws_lb" "aws_lb_app" {
-  depends_on         = [aws_db_instance.rds, aws_security_group.lb_sg]
-  name               = "webapp-lb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.lb_sg.id]
-  subnets            = values(aws_subnet.subnet_infra)[*].id
+  depends_on                 = [aws_db_instance.rds, aws_security_group.lb_sg]
+  name                       = "webapp-lb"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.lb_sg.id]
+  subnets                    = values(aws_subnet.subnet_infra)[*].id
   ip_address_type            = "ipv4"
   enable_deletion_protection = false
 
@@ -110,7 +101,7 @@ resource "aws_lb_target_group" "lb_targetgroup" {
   name       = "LoadBalancerTargetGroup"
   port       = "3000"
   protocol   = "HTTP"
-  vpc_id     = "${aws_vpc.vpc_infra.id}"
+  vpc_id     = aws_vpc.vpc_infra.id
   stickiness {
     type            = "lb_cookie"
     cookie_duration = 1800
@@ -121,7 +112,7 @@ resource "aws_lb_target_group" "lb_targetgroup" {
     timeout             = 45
     healthy_threshold   = 3
     unhealthy_threshold = 10
-    path                = "/"
+    path                = "/health"
   }
 }
 
@@ -129,18 +120,39 @@ resource "aws_lb_target_group" "lb_targetgroup" {
 # Listener for LoadBalancer
 resource "aws_lb_listener" "a_lb_listener" {
   depends_on        = [aws_lb.aws_lb_app]
-  load_balancer_arn = "${aws_lb.aws_lb_app.arn}"
+  load_balancer_arn = aws_lb.aws_lb_app.arn
   port              = "80"
   protocol          = "HTTP"
   default_action {
     type             = "forward"
-    target_group_arn = "${aws_lb_target_group.lb_targetgroup.arn}"
+    target_group_arn = aws_lb_target_group.lb_targetgroup.arn
   }
 }
 
 #Autoscaling Attachment
 resource "aws_autoscaling_attachment" "alb_asg" {
   depends_on             = [aws_lb_target_group.lb_targetgroup, aws_autoscaling_group.asg]
-  alb_target_group_arn   = "${aws_lb_target_group.lb_targetgroup.arn}"
-  autoscaling_group_name = "${aws_autoscaling_group.asg.id}"
+  alb_target_group_arn   = aws_lb_target_group.lb_targetgroup.arn
+  autoscaling_group_name = aws_autoscaling_group.asg.id
+}
+
+# scale-up alarm metrics
+resource "aws_autoscaling_policy" "cpu_policy_scaleup" {
+  depends_on             = [aws_autoscaling_group.asg]
+  name                   = "cpu-policy-scaleup"
+  autoscaling_group_name = aws_autoscaling_group.asg.name
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = "1"
+  cooldown               = "60"
+  policy_type            = "SimpleScaling"
+}
+
+# scale-down alarm metrics
+resource "aws_autoscaling_policy" "cpu_policy_scaledown" {
+  name                   = "cpu-policy-scaledown"
+  autoscaling_group_name = aws_autoscaling_group.asg.name
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = "-1"
+  cooldown               = "60"
+  policy_type            = "SimpleScaling"
 }
