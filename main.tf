@@ -97,14 +97,14 @@ resource "aws_security_group" "application" {
   //   ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
   // }
 
-  // ingress {
-  //   description      = var.sg_app_ingress_desc
-  //   from_port        = var.sg_app_ingress_p3
-  //   to_port          = var.sg_app_ingress_p3
-  //   protocol         = var.protocol
-  //   cidr_blocks      = [var.sg_app_cidr]
-  //   ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
-  // }
+  ingress {
+    description      = var.sg_app_ingress_desc
+    from_port        = var.sg_app_ingress_p3
+    to_port          = var.sg_app_ingress_p3
+    protocol         = var.protocol
+    cidr_blocks      = [var.sg_app_cidr]
+    ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
+  }
   ingress {
     description = var.sg_app_ingress_desc
     from_port   = var.sg_app_ingress_p4
