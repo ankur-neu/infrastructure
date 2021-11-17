@@ -40,6 +40,13 @@ resource "aws_cloudwatch_log_group" "csye6225" {
   name = "csye6225"
 }
 
+
+resource "aws_cloudwatch_log_stream" "stream" {
+  name           = "webapp"
+  log_group_name = aws_cloudwatch_log_group.csye6225.name
+
+}
+
 resource "aws_iam_policy_attachment" "ec2_attach3" {
   name       = "ec2attach3"
   users      = [var.app_user_name]
