@@ -37,10 +37,10 @@ resource "aws_launch_configuration" "alc" {
 resource "aws_autoscaling_group" "asg" {
   depends_on = [aws_launch_configuration.alc, aws_subnet.subnet_infra]
   name       = "autoScalingGroup"
-  max_size   = 5
-  min_size   = 3
+  max_size   = 1
+  min_size   = 1
   // health_check_grace_period = 60
-  desired_capacity     = 3
+  desired_capacity     = 1
   launch_configuration = aws_launch_configuration.alc.name
   vpc_zone_identifier  = values(aws_subnet.subnet_infra)[*].id
   target_group_arns    = ["${aws_lb_target_group.lb_targetgroup.arn}"]
