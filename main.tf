@@ -246,9 +246,9 @@ resource "aws_s3_bucket_public_access_block" "bucket_access" {
 // IAM *******************************************************************
 
 
-resource "aws_iam_role_policy" "WebAppS3" {
+resource "aws_iam_policy" "WebAppS3" {
   name = "webApps3"
-  role = aws_iam_role.EC2-CSYE6225.id
+  // role = aws_iam_role.EC2-CSYE6225.id
 
   policy = jsonencode({
 
@@ -261,11 +261,17 @@ resource "aws_iam_role_policy" "WebAppS3" {
           "s3:PutObject"
         ],
         "Resource" : [
+          "${aws_s3_bucket.bucket.arn}",
           "${aws_s3_bucket.bucket.arn}/*"
         ]
       },
     ]
   })
+}
+
+resource "aws_iam_user_policy_attachment" "policy_attacht_s3" {
+  user       = var.app_user_name
+  policy_arn = aws_iam_policy.WebAppS3.arn
 }
 
 resource "aws_iam_role" "EC2-CSYE6225" {
