@@ -1,39 +1,5 @@
 
 
-// ******************** auto scaling group *************
-
-
-resource "aws_launch_configuration" "alc" {
-  depends_on    = [aws_db_instance.rds]
-  name_prefix   = "asg_launch_config"
-  image_id      = data.aws_ami.ami.id
-  instance_type = "t2.micro"
-  user_data     = <<-EOF
-    #!/bin/bash
-    sudo apt-get update
-    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-    sudo apt install npm
-
-    echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
-    echo export PORT=${var.app_port} >> /etc/profile
-    echo export DB_NAME=${var.db_name} >> /etc/profile
-    echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
-    echo export DB_USER=${var.db_user} >> /etc/profile
-    echo export DB_PASS=${var.db_pass} >> /etc/profile
-    echo export DB_PORT=${var.sg_db_ingress_p1} >> /etc/profile
-    echo export BUCKET_NAME=${aws_s3_bucket.bucket.id} >> /etc/profile
-  EOF
-
-  key_name                    = aws_key_pair.ubuntu.key_name
-  iam_instance_profile        = aws_iam_instance_profile.iam_profile.name
-  security_groups             = ["${aws_security_group.application.id}"]
-  associate_public_ip_address = true
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 resource "aws_autoscaling_group" "asg" {
   depends_on = [aws_launch_configuration.alc, aws_subnet.subnet_infra]
   name       = "autoScalingGroup"
@@ -55,13 +21,13 @@ resource "aws_autoscaling_group" "asg" {
 
 
 resource "aws_lb" "aws_lb_app" {
-  depends_on                 = [aws_db_instance.rds, aws_security_group.lb_sg]
-  name                       = "webapp-lb"
-  internal                   = false
-  load_balancer_type         = "application"
-  security_groups            = [aws_security_group.lb_sg.id]
-  subnets                    = values(aws_subnet.subnet_infra)[*].id
-  ip_address_type            = "ipv4"
+  depends_on         = [aws_db_instance.rds, aws_security_group.lb_sg]
+  name               = "webapp-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.lb_sg.id]
+  subnets            = values(aws_subnet.subnet_infra)[*].id
+  // ip_address_type            = "ipv4"
   enable_deletion_protection = false
 
   tags = {
@@ -108,7 +74,7 @@ resource "aws_lb_target_group" "lb_targetgroup" {
     enabled         = true
   }
   health_check {
-    interval            = 55
+    interval            = 300
     timeout             = 45
     healthy_threshold   = 3
     unhealthy_threshold = 10
@@ -155,4 +121,49 @@ resource "aws_autoscaling_policy" "cpu_policy_scaledown" {
   scaling_adjustment     = "-1"
   cooldown               = "60"
   policy_type            = "SimpleScaling"
+}
+
+
+
+
+// ******************** auto scaling group *************
+
+
+resource "aws_launch_configuration" "alc" {
+  depends_on    = [aws_db_instance.rds]
+  name_prefix   = "asg_launch_config"
+  image_id      = data.aws_ami.ami.id
+  instance_type = "t2.micro"
+  user_data     = <<-EOF
+    #!/bin/bash
+    sudo apt-get update
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    sudo apt install npm
+
+    echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
+    echo export PORT=${var.app_port} >> /etc/profile
+    echo export DB_NAME=${var.db_name} >> /etc/profile
+    echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
+    echo export DB_USER=${var.db_user} >> /etc/profile
+    echo export DB_PASS=${var.db_pass} >> /etc/profile
+    echo export DB_PORT=${var.sg_db_ingress_p1} >> /etc/profile
+    echo export BUCKET_NAME=${aws_s3_bucket.bucket.id} >> /etc/profile
+
+
+
+
+
+    echo export ACCESS_KEY=${var.access_key} >> /etc/profile
+    echo export SECRET_KEY=${var.secret_key} >> /etc/profile
+
+  EOF
+
+  key_name                    = aws_key_pair.ubuntu.key_name
+  iam_instance_profile        = aws_iam_instance_profile.iam_profile.name
+  security_groups             = ["${aws_security_group.application.id}"]
+  associate_public_ip_address = true
+  lifecycle {
+    create_before_destroy = true
+  }
 }

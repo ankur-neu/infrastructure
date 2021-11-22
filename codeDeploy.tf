@@ -15,7 +15,8 @@ resource "aws_iam_policy" "code_deploy_ec2_s3" {
       {
         "Action" : [
           "s3:Get*",
-          "s3:List*"
+          "s3:List*",
+          "s3:PutObject",
         ],
         "Effect" : "Allow",
         "Resource" : [
