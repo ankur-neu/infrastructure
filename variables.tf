@@ -121,6 +121,11 @@ variable "db_multi_az" {
   type        = bool
 }
 
+variable "db_multi_az_read" {
+  description = "Availabilty of DB Read"
+  type        = bool
+}
+
 variable "db_identifier" {
   description = "DB Identifier"
   type        = string
