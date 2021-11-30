@@ -121,8 +121,18 @@ variable "db_multi_az" {
   type        = bool
 }
 
+variable "db_multi_az_read" {
+  description = "Availabilty of DB Read"
+  type        = bool
+}
+
 variable "db_identifier" {
   description = "DB Identifier"
+  type        = string
+}
+
+variable "db_identifier_replica" {
+  description = "DB Replica Identifier"
   type        = string
 }
 
@@ -204,6 +214,21 @@ variable "ec2_conn_user" {
   type        = string
 }
 
+variable "max_instance" {
+  description = "Max EC2 instance in autoscaling policy"
+  type        = string
+}
+
+variable "min_instance" {
+  description = "Min EC2 instance in autoscaling policy"
+  type        = string
+}
+
+variable "des_instance" {
+  description = "Desired EC2 instance in autoscaling policy"
+  type        = string
+}
+
 
 
 
@@ -278,5 +303,7 @@ variable "app_user_name" {
   type        = string
 }
 
-
-
+variable "TTL" {
+  type    = string
+  default = "15"
+}
