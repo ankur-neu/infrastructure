@@ -3,10 +3,10 @@
 resource "aws_autoscaling_group" "asg" {
   depends_on = [aws_launch_configuration.alc, aws_subnet.subnet_infra]
   name       = "autoScalingGroup"
-  max_size   = 5
-  min_size   = 3
+  max_size   = var.max_instance
+  min_size   = var.min_instance
   // health_check_grace_period = 60
-  desired_capacity     = 3
+  desired_capacity     = var.des_instance
   launch_configuration = aws_launch_configuration.alc.name
   vpc_zone_identifier  = values(aws_subnet.subnet_infra)[*].id
   target_group_arns    = ["${aws_lb_target_group.lb_targetgroup.arn}"]
@@ -142,6 +142,7 @@ resource "aws_launch_configuration" "alc" {
     sudo apt install npm
 
     echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
+    echo export DB_HOST_READ=${aws_db_instance.rds_read.address} >> /etc/profile
     echo export PORT=${var.app_port} >> /etc/profile
     echo export DB_NAME=${var.db_name} >> /etc/profile
     echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
@@ -149,7 +150,7 @@ resource "aws_launch_configuration" "alc" {
     echo export DB_PASS=${var.db_pass} >> /etc/profile
     echo export DB_PORT=${var.sg_db_ingress_p1} >> /etc/profile
     echo export BUCKET_NAME=${aws_s3_bucket.bucket.id} >> /etc/profile
-
+    echo export DOMAIN_NAME=${var.domain_name} >> /etc/profile
 
 
 
@@ -167,3 +168,5 @@ resource "aws_launch_configuration" "alc" {
     create_before_destroy = true
   }
 }
+
+// echo export DB_HOST_READ=${aws_db_instance.rds_read.address} >> /etc/profile

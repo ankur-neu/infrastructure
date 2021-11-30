@@ -167,36 +167,43 @@ resource "aws_db_parameter_group" "db_parameter_group" {
 
 
 resource "aws_db_instance" "rds" {
-  depends_on             = [aws_security_group.database, aws_db_parameter_group.db_parameter_group, aws_db_subnet_group.subnet_group]
-  allocated_storage      = 20
-  engine                 = var.db_engine
-  engine_version         = var.db_engine_version
-  instance_class         = var.db_instance_class
-  multi_az               = var.db_multi_az
-  identifier             = var.db_identifier
-  name                   = var.db_identifier
-  username               = var.db_identifier
-  password               = var.db_pass
-  db_subnet_group_name   = aws_db_subnet_group.subnet_group.name
+  depends_on              = [aws_security_group.database, aws_db_parameter_group.db_parameter_group, aws_db_subnet_group.subnet_group]
+  allocated_storage       = 20
+  engine                  = var.db_engine
+  engine_version          = var.db_engine_version
+  instance_class          = var.db_instance_class
+  multi_az                = var.db_multi_az
+  identifier              = var.db_identifier
+  name                    = var.db_identifier
+  username                = var.db_identifier
+  password                = var.db_pass
+  db_subnet_group_name    = aws_db_subnet_group.subnet_group.name
+  parameter_group_name    = aws_db_parameter_group.db_parameter_group.name
+  publicly_accessible     = var.db_public_access
+  skip_final_snapshot     = var.db_snapshot
+  vpc_security_group_ids  = [aws_security_group.database.id]
+  backup_retention_period = 5
+  apply_immediately       = true
+  availability_zone       = values(var.subnets)[0].az
+}
+
+resource "aws_db_instance" "rds_read" {
+  depends_on          = [aws_db_instance.rds]
+  replicate_source_db = aws_db_instance.rds.identifier
+  instance_class      = var.db_instance_class
+  engine              = var.db_engine
+  engine_version      = var.db_engine_version
+  // multi_az            = var.db_multi_az_read
+  identifier = var.db_identifier_replica
+  name       = var.db_identifier_replica
+  // db_subnet_group_name   = aws_db_subnet_group.subnet_group.name
   parameter_group_name   = aws_db_parameter_group.db_parameter_group.name
   publicly_accessible    = var.db_public_access
   skip_final_snapshot    = var.db_snapshot
   vpc_security_group_ids = [aws_security_group.database.id]
+  // backup_retention_period = 5
+  availability_zone = values(var.subnets)[1].az
 }
-
-// resource "aws_db_instance" "rds_read" {
-//   depends_on             = [aws_db_instance.rds]
-//   replicate_source_db    = aws_db_instance.rds.id
-//   instance_class         = var.db_instance_class
-//   multi_az               = var.db_multi_az_read
-//   identifier             = var.db_identifier
-//   name                   = var.db_identifier
-//   db_subnet_group_name   = aws_db_subnet_group.subnet_group.name
-//   parameter_group_name   = aws_db_parameter_group.db_parameter_group.name
-//   publicly_accessible    = var.db_public_access
-//   skip_final_snapshot    = var.db_snapshot
-//   vpc_security_group_ids = [aws_security_group.database.id]
-// }
 
 
 

@@ -55,7 +55,6 @@ resource "aws_iam_policy" "gh_upload_s3_policy" {
 resource "aws_iam_policy" "code_deploy_policy" {
   name        = "GH-Code-Deploy"
   description = "Instances read data from S3 buckets"
-  // depends_on  = [aws_iam_role.codedeploy_service_role]
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
@@ -113,7 +112,6 @@ resource "aws_iam_user_policy_attachment" "test-attach3" {
 
 resource "aws_iam_role" "ec2_service_role" {
   name = "CodeDeployEC2ServiceRole"
-  // depends_on = [aws_iam_role.codedeploy_service_role]
   assume_role_policy = jsonencode({
 
     "Version" : "2012-10-17",
@@ -130,13 +128,12 @@ resource "aws_iam_role" "ec2_service_role" {
       }
     ]
   })
-
 }
 
 //  ************* ec2 service role attachment
 resource "aws_iam_policy_attachment" "ec2_attach1" {
-  name       = "ec2attach1"
-  users      = [var.app_user_name]
+  name = "ec2attach1"
+  // users      = [var.app_user_name]
   roles      = ["${aws_iam_role.ec2_service_role.name}"]
   policy_arn = aws_iam_policy.code_deploy_ec2_s3.arn
 }
@@ -183,8 +180,6 @@ resource "aws_iam_policy_attachment" "codedeploy_service21" {
 
 
 
-
-
 resource "aws_codedeploy_app" "codedeploy_app" {
   compute_platform = "Server"
   name             = "webapp"
@@ -223,11 +218,8 @@ resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group" {
       target_group {
         name = aws_lb_target_group.lb_targetgroup.name
       }
-
     }
   }
-
   autoscaling_groups = ["${aws_autoscaling_group.asg.name}"]
-
 }
 

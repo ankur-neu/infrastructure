@@ -131,6 +131,11 @@ variable "db_identifier" {
   type        = string
 }
 
+variable "db_identifier_replica" {
+  description = "DB Replica Identifier"
+  type        = string
+}
+
 variable "db_pass" {
   description = "DB Password"
   type        = string
@@ -209,6 +214,21 @@ variable "ec2_conn_user" {
   type        = string
 }
 
+variable "max_instance" {
+  description = "Max EC2 instance in autoscaling policy"
+  type        = string
+}
+
+variable "min_instance" {
+  description = "Min EC2 instance in autoscaling policy"
+  type        = string
+}
+
+variable "des_instance" {
+  description = "Desired EC2 instance in autoscaling policy"
+  type        = string
+}
+
 
 
 
@@ -283,5 +303,7 @@ variable "app_user_name" {
   type        = string
 }
 
-
-
+variable "TTL" {
+  type    = string
+  default = "15"
+}
