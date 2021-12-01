@@ -165,8 +165,8 @@ resource "aws_iam_role" "codedeploy_service_role" {
 //  ************* code deploy service role attachment
 
 resource "aws_iam_policy_attachment" "codedeploy_service2" {
-  name       = "cdroleattach"
-  users      = [var.app_user_name]
+  name = "cdroleattach"
+  // users      = [var.app_user_name]
   roles      = ["${aws_iam_role.codedeploy_service_role.name}"]
   policy_arn = aws_iam_policy.code_deploy_policy.arn
 }
