@@ -99,6 +99,7 @@ resource "aws_iam_role" "rds_iam_role" {
 }
 
 resource "aws_kms_grant" "ebs_key_attachment" {
+  depends_on        = [aws_kms_key.kms_key_ebs, aws_iam_role.ebs_iam_role]
   name              = "ebs-key-attachment"
   key_id            = aws_kms_key.kms_key_ebs.key_id
   grantee_principal = aws_iam_role.ebs_iam_role.arn
@@ -108,6 +109,7 @@ resource "aws_kms_grant" "ebs_key_attachment" {
 
 
 resource "aws_kms_grant" "rds_key_attachment" {
+  depends_on        = [aws_kms_key.kms_key_rds, aws_iam_role.rds_iam_role]
   name              = "rds-key-attachment"
   key_id            = aws_kms_key.kms_key_rds.key_id
   grantee_principal = aws_iam_role.rds_iam_role.arn
