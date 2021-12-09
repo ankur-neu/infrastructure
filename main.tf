@@ -185,6 +185,8 @@ resource "aws_db_instance" "rds" {
   backup_retention_period = 5
   apply_immediately       = true
   availability_zone       = values(var.subnets)[0].az
+  storage_encrypted       = true
+  kms_key_id              = aws_kms_key.kms_key_rds.arn
 }
 
 resource "aws_db_instance" "rds_read" {
@@ -218,15 +220,15 @@ resource "random_string" "s3_name" {
   min_lower = 5
 }
 
-resource "aws_kms_key" "aws_key" {
-  description             = "Used to encrypt bucket objects"
-  deletion_window_in_days = 10
-}
+// resource "aws_kms_key" "aws_key" {
+//   description             = "Used to encrypt bucket objects"
+//   deletion_window_in_days = 10
+// }
 
 
 
 resource "aws_s3_bucket" "bucket" {
-  depends_on    = [random_string.s3_name, aws_kms_key.aws_key]
+  // depends_on    = [random_string.s3_name, aws_kms_key.aws_key]
   bucket        = "${random_string.s3_name.id}.${var.domain_name}"
   acl           = "private"
   force_destroy = true
@@ -234,8 +236,9 @@ resource "aws_s3_bucket" "bucket" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        kms_master_key_id = aws_kms_key.aws_key.arn
-        sse_algorithm     = "aws:kms"
+        // kms_master_key_id = aws_kms_key.aws_key.arn
+        // sse_algorithm     = "aws:kms"
+        sse_algorithm = "AES256"
       }
     }
   }

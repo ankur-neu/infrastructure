@@ -307,3 +307,9 @@ variable "TTL" {
   type    = string
   default = "15"
 }
+
+
+variable "account_id" {
+  type        = string
+  description = "AWS Account ID"
+}
