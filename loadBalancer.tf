@@ -42,10 +42,19 @@ resource "aws_security_group" "lb_sg" {
   vpc_id      = aws_vpc.vpc_infra.id
   description = "Allow ALB inbound traffic"
 
+  // ingress {
+  //   description      = var.sg_lb_ingress_desc
+  //   from_port        = var.sg_app_ingress_p2
+  //   to_port          = var.sg_app_ingress_p2
+  //   protocol         = var.protocol
+  //   cidr_blocks      = [var.sg_app_cidr]
+  //   ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
+  // }
+
   ingress {
     description      = var.sg_lb_ingress_desc
-    from_port        = var.sg_app_ingress_p2
-    to_port          = var.sg_app_ingress_p2
+    from_port        = var.sg_app_ingress_p1
+    to_port          = var.sg_app_ingress_p1
     protocol         = var.protocol
     cidr_blocks      = [var.sg_app_cidr]
     ipv6_cidr_blocks = [var.sg_app_cidr_ip6]
@@ -87,8 +96,9 @@ resource "aws_lb_target_group" "lb_targetgroup" {
 resource "aws_lb_listener" "a_lb_listener" {
   depends_on        = [aws_lb.aws_lb_app]
   load_balancer_arn = aws_lb.aws_lb_app.arn
-  port              = "80"
-  protocol          = "HTTP"
+  port              = "443"
+  protocol          = "HTTPS"
+  certificate_arn   = data.aws_acm_certificate.issued_cert.arn
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.lb_targetgroup.arn
@@ -123,12 +133,7 @@ resource "aws_autoscaling_policy" "cpu_policy_scaledown" {
   policy_type            = "SimpleScaling"
 }
 
-
-
-
 // ******************** auto scaling group *************
-
-
 resource "aws_launch_configuration" "alc" {
   depends_on    = [aws_db_instance.rds]
   name_prefix   = "asg_launch_config"
@@ -141,22 +146,17 @@ resource "aws_launch_configuration" "alc" {
     sudo apt-get install -y nodejs
     sudo apt install npm
 
-    echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
-    echo export DB_HOST_READ=${aws_db_instance.rds_read.address} >> /etc/profile
     echo export PORT=${var.app_port} >> /etc/profile
     echo export DB_NAME=${var.db_name} >> /etc/profile
     echo export DB_HOST=${aws_db_instance.rds.address} >> /etc/profile
+    echo export DB_HOST_READ=${aws_db_instance.rds_read.address} >> /etc/profile
     echo export DB_USER=${var.db_user} >> /etc/profile
     echo export DB_PASS=${var.db_pass} >> /etc/profile
     echo export DB_PORT=${var.sg_db_ingress_p1} >> /etc/profile
-    echo export BUCKET_NAME=${aws_s3_bucket.bucket.id} >> /etc/profile
-    echo export DOMAIN_NAME=${var.domain_name} >> /etc/profile
-
-
-
-
     echo export ACCESS_KEY=${var.access_key} >> /etc/profile
     echo export SECRET_KEY=${var.secret_key} >> /etc/profile
+    echo export BUCKET_NAME=${aws_s3_bucket.bucket.id} >> /etc/profile
+    echo export DOMAIN_NAME=${var.domain_name} >> /etc/profile
 
   EOF
 
@@ -166,6 +166,18 @@ resource "aws_launch_configuration" "alc" {
   associate_public_ip_address = true
   lifecycle {
     create_before_destroy = true
+  }
+  root_block_device {
+    encrypted             = true
+    volume_size           = 20
+    volume_type           = "gp2"
+    delete_on_termination = true
+  }
+  ebs_block_device {
+    encrypted   = true
+    volume_size = 20
+    volume_type = "gp2"
+    device_name = "/dev/sda2"
   }
 }
 

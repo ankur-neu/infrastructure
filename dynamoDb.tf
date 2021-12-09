@@ -33,7 +33,7 @@ resource "aws_iam_policy" "dynamo_policy" {
           "dynamodb:DescribeLimits",
           "dynamodb:DescribeTimeToLive",
           "dynamodb:Get*",
-          "dynamodb:PutItem*",
+          "dynamodb:PutItem*"
         ],
         "Resource" : "*"
       },
@@ -51,7 +51,7 @@ resource "aws_iam_policy" "dynamo_policy" {
           "dynamodb:CreateTable",
           "dynamodb:Delete*",
           "dynamodb:Update*",
-          "dynamodb:PutItem"
+          "dynamodb:PutItem*"
         ],
         "Resource" : "arn:aws:dynamodb:*:*:table/dynamo"
       }

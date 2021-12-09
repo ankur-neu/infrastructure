@@ -24,3 +24,11 @@
 
 
 
+#### Command to import ssl certificate
+
+aws acm import-certificate --certificate fileb://prod.chauhanankur.me.pem \
+      --certificate-chain fileb://prod.chauhanankur.me.bundle.pem \
+      --private-key fileb://privateKey.pem 	
+
+
+
